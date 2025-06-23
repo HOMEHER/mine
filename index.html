@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>踩地雷 Minesweeper</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>踩地雷 Minesweeper</h1>
+    <div id="game-controls">
+        <label>列數: <input type="number" id="rows" value="9" min="5" max="30"></label>
+        <label>行數: <input type="number" id="cols" value="9" min="5" max="30"></label>
+        <label>地雷數: <input type="number" id="mines" value="10" min="1" max="200"></label>
+        <button id="start-btn">開始遊戲</button>
+        <button id="see-btn">透視</button>
+    </div>
+    <div id="game-board"></div>
+    <div id="game-message"></div>
+    <script src="main.js"></script>
+</body>
+</html>
