@@ -7,6 +7,8 @@ const rowsInput = document.getElementById('rows');
 const colsInput = document.getElementById('cols');
 const minesInput = document.getElementById('mines');
 const seeBtn = document.getElementById('see-btn');
+const timerElement = document.getElementById('timer');
+const bestTimeElement = document.getElementById('best-time');
 
 let board = [];
 let revealed = [];
@@ -17,6 +19,8 @@ let cols = 9;
 let mines = 10;
 let gameOver = false;
 let seeMode = false;
+let startTime = null;
+let timerInterval = null;
 
 seeBtn.addEventListener('mousedown', () => {
     seeMode = true;
@@ -44,6 +48,7 @@ function initGame() {
     placeMines();
     calculateNumbers();
     renderBoard();
+    startTimer();
 }
 
 function placeMines() {
@@ -115,6 +120,7 @@ function renderBoard() {
 function handleCellClick(r, c) {
     if (gameOver || revealed[r][c] || flagged[r][c]) return;
     if (board[r][c] === 'M') {
+        stopTimer();
         revealAllMines();
         messageElement.textContent = '遊戲結束！你踩到地雷了！';
         gameOver = true;
@@ -122,7 +128,10 @@ function handleCellClick(r, c) {
     }
     revealCell(r, c);
     if (checkWin()) {
-        messageElement.textContent = '恭喜你贏了！';
+        stopTimer();
+        const seconds = Math.floor((Date.now() - startTime) / 1000);
+        updateBestTime(seconds);
+        messageElement.textContent = `恭喜你贏了！用時 ${seconds} 秒`;
         gameOver = true;
         revealAllMines(true);
     }
@@ -172,7 +181,50 @@ function getNumberColor(num) {
     return colors[num - 1] || '#333';
 }
 
-startBtn.addEventListener('click', initGame);
+function startTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+    }
+    startTime = Date.now();
+    timerInterval = setInterval(updateTimer, 1000);
+}
 
-// 預設啟動
+function stopTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+}
+
+function updateTimer() {
+    const seconds = Math.floor((Date.now() - startTime) / 1000);
+    timerElement.textContent = `時間: ${seconds}秒`;
+}
+
+function updateBestTime(seconds) {
+    const currentConfig = `${rows}x${cols}-${mines}`;
+    const bestTimes = JSON.parse(localStorage.getItem('minesweeperBestTimes') || '{}');
+    const currentBest = bestTimes[currentConfig];
+    
+    if (!currentBest || seconds < currentBest) {
+        bestTimes[currentConfig] = seconds;
+        localStorage.setItem('minesweeperBestTimes', JSON.stringify(bestTimes));
+        showBestTime();
+    }
+}
+
+function showBestTime() {
+    const currentConfig = `${rows}x${cols}-${mines}`;
+    const bestTimes = JSON.parse(localStorage.getItem('minesweeperBestTimes') || '{}');
+    const bestTime = bestTimes[currentConfig];
+    bestTimeElement.textContent = bestTime ? `最佳紀錄: ${bestTime}秒` : '最佳紀錄: 尚無紀錄';
+}
+
+startBtn.addEventListener('click', () => {
+    initGame();
+    showBestTime();
+});
+
+// 初始化時顯示最佳紀錄
+showBestTime();
 initGame();
